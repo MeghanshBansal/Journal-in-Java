@@ -15,7 +15,7 @@ public class JournalServer {
 
     private final Map<String, JournalEntry> journalEntryMap = new HashMap<>();
     @GetMapping("/get-all")
-    public FinalResponse<List<JournalEntry>> sayHello(){
+    public FinalResponse<List<JournalEntry>> getEntries(){
         return new FinalResponse<>(
                 new FinalResponse.Meta(200, "fetched successfully"),
                 new ArrayList<JournalEntry>(journalEntryMap.values())
