@@ -1,9 +1,12 @@
 package com.github.MeghanshBansal.myJournal.entity;
 
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.stereotype.Component;
 
-@Component
+@Document
 public class JournalEntry {
+    @Id
     private String id;
     private String title;
     private String content;
