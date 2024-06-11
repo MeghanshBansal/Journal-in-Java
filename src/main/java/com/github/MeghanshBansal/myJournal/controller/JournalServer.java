@@ -10,7 +10,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/journal")
-public class JournalServer {
+public class    JournalServer {
     @Autowired
     private JournalEntryService service;
 

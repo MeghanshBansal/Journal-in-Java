@@ -15,7 +15,7 @@ import java.util.Optional;
 public class JournalEntryService {
     private static final Logger log = LoggerFactory.getLogger(JournalEntryService.class);
     @Autowired
-    private static JournalEntryRepository repo;
+    private JournalEntryRepository repo;
 
     public List<JournalEntry> getAll(){
         try{
