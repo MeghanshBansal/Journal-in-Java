@@ -1,6 +1,7 @@
 package com.github.MeghanshBansal.myJournal.service;
 
 import com.github.MeghanshBansal.myJournal.entity.JournalEntry;
+import com.github.MeghanshBansal.myJournal.entity.JournalEntryServiceResponse;
 import com.github.MeghanshBansal.myJournal.repository.JournalEntryRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,59 +18,63 @@ public class JournalEntryService {
     @Autowired
     private JournalEntryRepository repo;
 
-    public List<JournalEntry> getAll(){
+    public JournalEntryServiceResponse<List<JournalEntry>> getAll(){
+        JournalEntryServiceResponse<ArrayList<JournalEntry>> resp;
         try{
-            return (ArrayList<JournalEntry>) repo.findAll();
+             return new JournalEntryServiceResponse<>((ArrayList<JournalEntry>) repo.findAll(), null);
         }catch(Exception e){
             log.error("failed to get all the records from database with exception: {}", e.toString());
+            return new JournalEntryServiceResponse<>(new ArrayList<JournalEntry>(), new Error("failed to get entries"));
         }
-        return new ArrayList<>();
     }
 
-    public JournalEntry getEntryById(String id){
+    public JournalEntryServiceResponse<JournalEntry> getEntryById(String id){
         try{
             Optional<JournalEntry> entry = repo.findById(id);
             if (entry.isPresent()) {
-                return entry.get();
+                return new JournalEntryServiceResponse<>(entry.get(), null);
             }else {
                 log.info("entry not present with id: {}", id);
-                return null;
+                return new JournalEntryServiceResponse<>(null, new Error("entry does not exist"));
             }
         }catch(Exception e){
             log.error("failed to get entry from the database with exception: {}", e.toString());
-            return null;
+            return new JournalEntryServiceResponse<>(null, new Error("failed to get the entry"));
         }
     }
 
-    public boolean saveEntry(JournalEntry newEntry){
+    public JournalEntryServiceResponse<Boolean> saveEntry(JournalEntry newEntry){
         try{
             repo.save(newEntry);
-            return true;
+            return new JournalEntryServiceResponse<>(true, null);
         }catch (Exception e){
             log.error("failed to save entry from the database with exception: {}", e.toString());
-            return false;
+            return new JournalEntryServiceResponse<>(false, new Error("failed to save entry in the database"));
         }
     }
 
-    public boolean deleteEntryById(String id){
+    public JournalEntryServiceResponse<Boolean> deleteEntryById(String id){
         try{
-            repo.deleteById(id);return true;
+            repo.deleteById(id);
+            return new JournalEntryServiceResponse<>(true, null);
         }catch (Exception e){
             log.error("failed to delete entry from the database with exception: {}", e.toString());
-            return false;
+            return new JournalEntryServiceResponse<>(false, new Error("failed to delete the entry"));
         }
     }
 
-    public boolean updateEntryById(String id, JournalEntry updateEntry){
-        JournalEntry entry = this.getEntryById(id);
-        if (entry != null){
-            entry.setTitle(updateEntry.getTitle());
-            entry.setContent(updateEntry.getContent());
+    public JournalEntryServiceResponse<Boolean> updateEntryById(String id, JournalEntry updateEntry){
+        JournalEntryServiceResponse<JournalEntry> entry = this.getEntryById(id);
+        JournalEntry newEntry = entry.getValue();
+        if (entry.getValue() != null){
+            newEntry.setTitle(updateEntry.getTitle());
+            newEntry.setContent(updateEntry.getContent());
         }else{
             log.error("failed to get entry from the database");
-            return false;
+            return new JournalEntryServiceResponse<>(false, new Error("failed to update the entry"));
         }
 
-        return this.saveEntry(entry);
+        JournalEntryServiceResponse<Boolean> resp = this.saveEntry(newEntry);
+        return new JournalEntryServiceResponse<>(resp.getValue(), resp.getError());
     }
 }
