@@ -1,7 +1,7 @@
 package com.github.MeghanshBansal.myJournal.service;
 
 import com.github.MeghanshBansal.myJournal.entity.JournalEntry;
-import com.github.MeghanshBansal.myJournal.entity.JournalEntryServiceResponse;
+import com.github.MeghanshBansal.myJournal.entity.ServiceResponse;
 import com.github.MeghanshBansal.myJournal.repository.JournalEntryRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,63 +18,63 @@ public class JournalEntryService {
     @Autowired
     private JournalEntryRepository repo;
 
-    public JournalEntryServiceResponse<List<JournalEntry>> getAll(){
-        JournalEntryServiceResponse<ArrayList<JournalEntry>> resp;
+    public ServiceResponse<List<JournalEntry>> getAll(){
+        ServiceResponse<ArrayList<JournalEntry>> resp;
         try{
-             return new JournalEntryServiceResponse<>((ArrayList<JournalEntry>) repo.findAll(), null);
+             return new ServiceResponse<>((ArrayList<JournalEntry>) repo.findAll(), null);
         }catch(Exception e){
             log.error("failed to get all the records from database with exception: {}", e.toString());
-            return new JournalEntryServiceResponse<>(new ArrayList<JournalEntry>(), new Error("failed to get entries"));
+            return new ServiceResponse<>(new ArrayList<JournalEntry>(), new Error("failed to get entries"));
         }
     }
 
-    public JournalEntryServiceResponse<JournalEntry> getEntryById(String id){
+    public ServiceResponse<JournalEntry> getEntryById(String id){
         try{
             Optional<JournalEntry> entry = repo.findById(id);
             if (entry.isPresent()) {
-                return new JournalEntryServiceResponse<>(entry.get(), null);
+                return new ServiceResponse<>(entry.get(), null);
             }else {
                 log.info("entry not present with id: {}", id);
-                return new JournalEntryServiceResponse<>(null, new Error("entry does not exist"));
+                return new ServiceResponse<>(null, new Error("entry does not exist"));
             }
         }catch(Exception e){
             log.error("failed to get entry from the database with exception: {}", e.toString());
-            return new JournalEntryServiceResponse<>(null, new Error("failed to get the entry"));
+            return new ServiceResponse<>(null, new Error("failed to get the entry"));
         }
     }
 
-    public JournalEntryServiceResponse<Boolean> saveEntry(JournalEntry newEntry){
+    public ServiceResponse<Boolean> saveEntry(JournalEntry newEntry){
         try{
             repo.save(newEntry);
-            return new JournalEntryServiceResponse<>(true, null);
+            return new ServiceResponse<>(true, null);
         }catch (Exception e){
             log.error("failed to save entry from the database with exception: {}", e.toString());
-            return new JournalEntryServiceResponse<>(false, new Error("failed to save entry in the database"));
+            return new ServiceResponse<>(false, new Error("failed to save entry in the database"));
         }
     }
 
-    public JournalEntryServiceResponse<Boolean> deleteEntryById(String id){
+    public ServiceResponse<Boolean> deleteEntryById(String id){
         try{
             repo.deleteById(id);
-            return new JournalEntryServiceResponse<>(true, null);
+            return new ServiceResponse<>(true, null);
         }catch (Exception e){
             log.error("failed to delete entry from the database with exception: {}", e.toString());
-            return new JournalEntryServiceResponse<>(false, new Error("failed to delete the entry"));
+            return new ServiceResponse<>(false, new Error("failed to delete the entry"));
         }
     }
 
-    public JournalEntryServiceResponse<Boolean> updateEntryById(String id, JournalEntry updateEntry){
-        JournalEntryServiceResponse<JournalEntry> entry = this.getEntryById(id);
+    public ServiceResponse<Boolean> updateEntryById(String id, JournalEntry updateEntry){
+        ServiceResponse<JournalEntry> entry = this.getEntryById(id);
         JournalEntry newEntry = entry.getValue();
         if (entry.getValue() != null){
             newEntry.setTitle(updateEntry.getTitle());
             newEntry.setContent(updateEntry.getContent());
         }else{
             log.error("failed to get entry from the database");
-            return new JournalEntryServiceResponse<>(false, new Error("failed to update the entry"));
+            return new ServiceResponse<>(false, new Error("failed to update the entry"));
         }
 
-        JournalEntryServiceResponse<Boolean> resp = this.saveEntry(newEntry);
-        return new JournalEntryServiceResponse<>(resp.getValue(), resp.getError());
+        ServiceResponse<Boolean> resp = this.saveEntry(newEntry);
+        return new ServiceResponse<>(resp.getValue(), resp.getError());
     }
 }
