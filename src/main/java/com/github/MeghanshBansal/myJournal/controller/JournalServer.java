@@ -47,7 +47,7 @@ public class JournalServer {
             );
         } else {
             return new ResponseEntity<>(new FinalResponse<>(
-                    new FinalResponse.Meta(500, "failed to create the entry"),
+                    new FinalResponse.Meta(200, "failed to create the entry"),
                     true),
                     HttpStatus.INTERNAL_SERVER_ERROR
             );
@@ -100,7 +100,18 @@ public class JournalServer {
     }
 
     @GetMapping("/change-assignedto/{id}/{userName}")
-    public ResponseEntity<Boolean> updateAssignedTo(@PathVariable ObjectId id, @PathVariable String userName){
-        return new ResponseEntity<>(null, null);
+    public ResponseEntity<FinalResponse<Boolean>> updateAssignedTo(@PathVariable ObjectId id, @PathVariable String userName) {
+        ServiceResponse<Boolean> resp = service.updateOwnerOfJournal(id, userName);
+        if (resp.getError() != null) {
+            return new ResponseEntity<>(new FinalResponse<>(
+                    new FinalResponse.Meta(500, "failed to update the journal entry"),
+                    false
+            ), HttpStatus.INTERNAL_SERVER_ERROR);
+        } else {
+            return new ResponseEntity<>(new FinalResponse<>(
+                    new FinalResponse.Meta(200, "successfully updated the journal entry"),
+                    resp.getValue()
+            ), HttpStatus.OK);
+        }
     }
 }

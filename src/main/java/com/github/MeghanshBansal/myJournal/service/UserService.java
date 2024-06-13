@@ -47,7 +47,7 @@ public class UserService {
 
     public ServiceResponse<User> getUserByUserName(String userName){
         try{
-            Optional<User> user = Optional.ofNullable(repo.findByUserName(userName));
+            Optional<User> user = repo.findByUserName(userName);
             return user.map(value -> new ServiceResponse<>(
                     value,
                     null
