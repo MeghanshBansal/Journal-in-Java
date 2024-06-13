@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
@@ -28,7 +29,7 @@ public class UserService {
         }
     }
 
-    public ServiceResponse<User> getOneById(ObjectId id) {
+    public ServiceResponse<User> getUserById(ObjectId id) {
         try {
             Optional<User> user = repo.findById(id);
             return user.map(value -> new ServiceResponse<>(
@@ -40,6 +41,25 @@ public class UserService {
             log.error("failed to get the data from the database with exception {}", e.toString());
             return new ServiceResponse<>(
                     new User(), new Error("entry not present")
+            );
+        }
+    }
+
+    public ServiceResponse<User> getUserByUserName(String userName){
+        try{
+            Optional<User> user = Optional.ofNullable(repo.findByUserName(userName));
+            return user.map(value -> new ServiceResponse<>(
+                    value,
+                    null
+            )).orElseGet(() -> new ServiceResponse<>(
+                    null,
+                    new Error("no user present")
+            ));
+        }catch (Exception e){
+            log.error("failed to fetch user from the database with exception {}", e.toString());
+            return new ServiceResponse<>(
+              null,
+                    new Error("failed to fetch the user from the database")
             );
         }
     }
@@ -65,7 +85,7 @@ public class UserService {
     }
 
     public ServiceResponse<Boolean> updateUserById(ObjectId id, User updateUser) {
-        ServiceResponse<User> resp = this.getOneById(id);
+        ServiceResponse<User> resp = this.getUserById(id);
         if (resp.getError() == null) {
             User user = resp.getValue();
             user.setUserName(updateUser.getUserName());

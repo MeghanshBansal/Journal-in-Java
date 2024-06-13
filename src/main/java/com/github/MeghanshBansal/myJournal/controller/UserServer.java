@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 @RestController
 @RequestMapping("/user")
@@ -44,7 +43,7 @@ public class UserServer {
 
     @GetMapping("/get/{id}")
     public ResponseEntity<FinalResponse<User>> getOne(@PathVariable ObjectId id) {
-        ServiceResponse<User> user = service.getOneById(id);
+        ServiceResponse<User> user = service.getUserById(id);
         if (user.getError() != null) {
             return new ResponseEntity<>(
                     new FinalResponse<>(

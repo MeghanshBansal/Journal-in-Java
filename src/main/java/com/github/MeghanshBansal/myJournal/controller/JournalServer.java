@@ -4,6 +4,7 @@ import com.github.MeghanshBansal.myJournal.entity.FinalResponse;
 import com.github.MeghanshBansal.myJournal.entity.JournalEntry;
 import com.github.MeghanshBansal.myJournal.entity.ServiceResponse;
 import com.github.MeghanshBansal.myJournal.service.JournalEntryService;
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,9 +36,9 @@ public class JournalServer {
         }
     }
 
-    @PostMapping("/create")
-    public ResponseEntity<FinalResponse<Boolean>> createEntry(@RequestBody JournalEntry entry) {
-        ServiceResponse<Boolean> res = service.saveEntry(entry);
+    @PostMapping("/create/{userName}")
+    public ResponseEntity<FinalResponse<Boolean>> createEntry(@RequestBody JournalEntry entry, @PathVariable String userName) {
+        ServiceResponse<Boolean> res = service.saveEntry(entry, userName);
         if (res.getValue()) {
             return new ResponseEntity<>(new FinalResponse<>(
                     new FinalResponse.Meta(200, "entry created successfully"),
@@ -54,7 +55,7 @@ public class JournalServer {
     }
 
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<FinalResponse<Boolean>> deleteEntryById(@PathVariable String id) {
+    public ResponseEntity<FinalResponse<Boolean>> deleteEntryById(@PathVariable ObjectId id) {
         ServiceResponse<Boolean> resp = service.deleteEntryById(id);
         if (resp.getValue()) {
             return new ResponseEntity<>(new FinalResponse<>(
@@ -72,7 +73,7 @@ public class JournalServer {
     }
 
     @PutMapping("update/{id}")
-    public ResponseEntity<FinalResponse<Boolean>> updateEntryById(@PathVariable String id, @RequestBody JournalEntry updateEntry) {
+    public ResponseEntity<FinalResponse<Boolean>> updateEntryById(@PathVariable ObjectId id, @RequestBody JournalEntry updateEntry) {
         ServiceResponse<Boolean> resp = service.updateEntryById(id, updateEntry);
         if (resp.getValue()) {
             return new ResponseEntity<>(new FinalResponse<>(
@@ -90,11 +91,16 @@ public class JournalServer {
     }
 
     @GetMapping("/get/{id}")
-    public ResponseEntity<FinalResponse<JournalEntry>> getEntryById(@PathVariable String id) {
+    public ResponseEntity<FinalResponse<JournalEntry>> getEntryById(@PathVariable ObjectId id) {
         return new ResponseEntity<>(new FinalResponse<>(
                 new FinalResponse.Meta(200, "fetched successfully"),
                 service.getEntryById(id).getValue()
         ), HttpStatus.OK
         );
+    }
+
+    @GetMapping("/change-assignedto/{id}/{userName}")
+    public ResponseEntity<Boolean> updateAssignedTo(@PathVariable ObjectId id, @PathVariable String userName){
+        return new ResponseEntity<>(null, null);
     }
 }
