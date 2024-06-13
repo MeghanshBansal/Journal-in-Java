@@ -2,6 +2,7 @@ package com.github.MeghanshBansal.myJournal.controller;
 
 import com.github.MeghanshBansal.myJournal.entity.FinalResponse;
 import com.github.MeghanshBansal.myJournal.entity.JournalEntry;
+import com.github.MeghanshBansal.myJournal.entity.JournalEntryResp;
 import com.github.MeghanshBansal.myJournal.entity.ServiceResponse;
 import com.github.MeghanshBansal.myJournal.service.JournalEntryService;
 import org.bson.types.ObjectId;
@@ -19,19 +20,19 @@ public class JournalServer {
     private JournalEntryService service;
 
     @GetMapping("/get-all")
-    public ResponseEntity<FinalResponse<List<JournalEntry>>> getEntries() {
-        ServiceResponse<List<JournalEntry>> entries = service.getAll();
+    public ResponseEntity<FinalResponse<List<JournalEntryResp>>> getEntries() {
+        ServiceResponse<List<JournalEntryResp>> entries = service.getAll();
         if (entries.getError() != null) {
             return new ResponseEntity<>(new FinalResponse<>(
                     new FinalResponse.Meta(500, "failed to fetch journal entries"),
                     null),
-                    HttpStatus.OK
+                    HttpStatus.INTERNAL_SERVER_ERROR
             );
         } else {
             return new ResponseEntity<>(new FinalResponse<>(
                     new FinalResponse.Meta(200, "entries fetched successfully"),
                     entries.getValue()),
-                    HttpStatus.INTERNAL_SERVER_ERROR
+                    HttpStatus.OK
             );
         }
     }
@@ -91,7 +92,7 @@ public class JournalServer {
     }
 
     @GetMapping("/get/{id}")
-    public ResponseEntity<FinalResponse<JournalEntry>> getEntryById(@PathVariable ObjectId id) {
+    public ResponseEntity<FinalResponse<JournalEntryResp>> getEntryById(@PathVariable ObjectId id) {
         return new ResponseEntity<>(new FinalResponse<>(
                 new FinalResponse.Meta(200, "fetched successfully"),
                 service.getEntryById(id).getValue()

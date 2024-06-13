@@ -1,6 +1,7 @@
 package com.github.MeghanshBansal.myJournal.service;
 
 import com.github.MeghanshBansal.myJournal.entity.JournalEntry;
+import com.github.MeghanshBansal.myJournal.entity.JournalEntryResp;
 import com.github.MeghanshBansal.myJournal.entity.ServiceResponse;
 import com.github.MeghanshBansal.myJournal.entity.User;
 import com.github.MeghanshBansal.myJournal.repository.JournalEntryRepository;
@@ -23,21 +24,33 @@ public class JournalEntryService {
     @Autowired
     private UserRepository userRepo;
 
-    public ServiceResponse<List<JournalEntry>> getAll() {
-        ServiceResponse<ArrayList<JournalEntry>> resp;
+    public ServiceResponse<List<JournalEntryResp>> getAll() {
         try {
-            return new ServiceResponse<>((ArrayList<JournalEntry>) journalRepo.findAll(), null);
+            Optional<List<JournalEntry>> entries = Optional.of(journalRepo.findAll());
+            List<JournalEntry> entryList = entries.get();
+            List<JournalEntryResp> respList = new ArrayList<>();
+            for (JournalEntry journalEntry : entryList) {
+                String id = journalEntry.getId().toString();
+                String title = journalEntry.getTitle();
+                String content = journalEntry.getContent();
+                String userName = journalEntry.getOwner().getName();
+                respList.add(new JournalEntryResp(id, title, content, userName));
+            }
+            return new ServiceResponse<>(respList, null);
         } catch (Exception e) {
             log.error("failed to get all the records from database with exception: {}", e.toString());
-            return new ServiceResponse<>(new ArrayList<JournalEntry>(), new Error("failed to get entries"));
+            return new ServiceResponse<>(new ArrayList<JournalEntryResp>(), new Error("failed to get entries"));
         }
     }
 
-    public ServiceResponse<JournalEntry> getEntryById(ObjectId id) {
+    public ServiceResponse<JournalEntryResp> getEntryById(ObjectId id) {
         try {
             Optional<JournalEntry> entry = journalRepo.findById(id);
             if (entry.isPresent()) {
-                return new ServiceResponse<>(entry.get(), null);
+                return new ServiceResponse<>(new JournalEntryResp(entry.get().getId().toString(),
+                        entry.get().getTitle(),
+                        entry.get().getContent(),
+                        entry.get().getOwner().getName()), null);
             } else {
                 log.info("entry not present with id: {}", id);
                 return new ServiceResponse<>(null, new Error("entry does not exist"));
@@ -76,21 +89,21 @@ public class JournalEntryService {
     }
 
     public ServiceResponse<Boolean> updateEntryById(ObjectId id, JournalEntry updateEntry) {
-        ServiceResponse<JournalEntry> entry = this.getEntryById(id);
-        JournalEntry newEntry = entry.getValue();
-        if (entry.getValue() != null) {
+        Optional<JournalEntry> entry = journalRepo.findById(id);
+        JournalEntry newEntry;
+        if (entry.isPresent()){
+            newEntry = entry.get();
             newEntry.setTitle(updateEntry.getTitle());
             newEntry.setContent(updateEntry.getContent());
         } else {
             log.error("failed to get entry from the database");
             return new ServiceResponse<>(false, new Error("failed to update the entry"));
         }
-
-        ServiceResponse<Boolean> resp = this.saveEntry(newEntry, entry.getValue().getOwner().getUserName());
+        ServiceResponse<Boolean> resp = this.saveEntry(newEntry, entry.get().getOwner().getName());
         return new ServiceResponse<>(resp.getValue(), resp.getError());
     }
 
-    public ServiceResponse<Boolean> updateOwnerOfJournal(ObjectId id, String userName){
+    public ServiceResponse<Boolean> updateOwnerOfJournal(ObjectId id, String userName) {
         Optional<JournalEntry> entry = journalRepo.findById(id);
         if (entry.isEmpty()) return new ServiceResponse<>(false, new Error("journal entry not found"));
         Optional<User> user = userRepo.findByUserName(userName);
@@ -99,7 +112,7 @@ public class JournalEntryService {
         try {
             journalRepo.save(entry.get());
             return new ServiceResponse<>(true, null);
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error("failed to save the updates with exception {}", e.toString());
             return new ServiceResponse<>(false, new Error("failed to save the updated details"));
         }
