@@ -3,6 +3,7 @@ package com.github.MeghanshBansal.myJournal.controller;
 import com.github.MeghanshBansal.myJournal.entity.FinalResponse;
 import com.github.MeghanshBansal.myJournal.entity.ServiceResponse;
 import com.github.MeghanshBansal.myJournal.entity.User;
+import com.github.MeghanshBansal.myJournal.entity.UserResp;
 import com.github.MeghanshBansal.myJournal.service.UserService;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,8 +21,8 @@ public class UserServer {
     private UserService service;
 
     @GetMapping("/get-all")
-    public ResponseEntity<FinalResponse<List<User>>> getAll() {
-        ServiceResponse<List<User>> users = service.getAll();
+    public ResponseEntity<FinalResponse<List<UserResp>>> getAll() {
+        ServiceResponse<List<UserResp>> users = service.getAll();
         if (users.getError() != null) {
             return new ResponseEntity<>(
                     new FinalResponse<>(
@@ -42,13 +43,13 @@ public class UserServer {
     }
 
     @GetMapping("/get/{id}")
-    public ResponseEntity<FinalResponse<User>> getOne(@PathVariable ObjectId id) {
-        ServiceResponse<User> user = service.getUserById(id);
+    public ResponseEntity<FinalResponse<UserResp>> getOne(@PathVariable ObjectId id) {
+        ServiceResponse<UserResp> user = service.getUserById(id);
         if (user.getError() != null) {
             return new ResponseEntity<>(
                     new FinalResponse<>(
                             new FinalResponse.Meta(500, "failed to fetch the data"),
-                            new User()
+                            new UserResp()
                     ),
                     HttpStatus.INTERNAL_SERVER_ERROR
             );
