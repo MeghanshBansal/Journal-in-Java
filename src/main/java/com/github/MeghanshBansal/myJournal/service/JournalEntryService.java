@@ -33,8 +33,8 @@ public class JournalEntryService {
                 String id = journalEntry.getId().toString();
                 String title = journalEntry.getTitle();
                 String content = journalEntry.getContent();
-                String userName = journalEntry.getOwner().getName();
-                respList.add(new JournalEntryResp(id, title, content, userName));
+                String name = journalEntry.getOwner().getName();
+                respList.add(new JournalEntryResp(id, title, content, name));
             }
             return new ServiceResponse<>(respList, null);
         } catch (Exception e) {
@@ -63,7 +63,7 @@ public class JournalEntryService {
 
     public ServiceResponse<Boolean> saveEntry(JournalEntry newEntry, String userName) {
         try {
-            Optional<User> user = userRepo.findByUserName(userName);
+            Optional<User> user = userRepo.findByName(userName);
             if (user.isPresent()) {
                 newEntry.setOwner(user.get());
                 journalRepo.save(newEntry);
@@ -106,7 +106,7 @@ public class JournalEntryService {
     public ServiceResponse<Boolean> updateOwnerOfJournal(ObjectId id, String userName) {
         Optional<JournalEntry> entry = journalRepo.findById(id);
         if (entry.isEmpty()) return new ServiceResponse<>(false, new Error("journal entry not found"));
-        Optional<User> user = userRepo.findByUserName(userName);
+        Optional<User> user = userRepo.findByName(userName);
         if (user.isEmpty()) return new ServiceResponse<>(false, new Error("failed to get the user details"));
         entry.get().setOwner(user.get());
         try {

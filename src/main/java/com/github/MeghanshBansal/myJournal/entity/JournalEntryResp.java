@@ -8,12 +8,12 @@ public class JournalEntryResp {
     private String id;
     private String title;
     private String content;
-    private String userName;
+    private String name;
 
-    public JournalEntryResp(String id, String title, String content, String userName) {
+    public JournalEntryResp(String id, String title, String content, String name) {
         this.id = id;
         this.title = title;
         this.content = content;
-        this.userName = userName;
+        this.name = name;
     }
 }

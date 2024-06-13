@@ -78,7 +78,7 @@ public class UserServer {
         } else {
             return new ResponseEntity<>(
                     new FinalResponse<>(
-                            new FinalResponse.Meta(500, "data saved successfully"),
+                            new FinalResponse.Meta(200, "data saved successfully"),
                             res.getValue()
                     ),
                     HttpStatus.OK

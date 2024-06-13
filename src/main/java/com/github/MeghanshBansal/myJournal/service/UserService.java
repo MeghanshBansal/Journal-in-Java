@@ -62,7 +62,7 @@ public class UserService {
 
     public ServiceResponse<User> getUserByUserName(String userName) {
         try {
-            Optional<User> user = repo.findByUserName(userName);
+            Optional<User> user = repo.findByName(userName);
             return user.map(value -> new ServiceResponse<>(
                     value,
                     null
