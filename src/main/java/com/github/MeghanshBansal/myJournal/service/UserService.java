@@ -8,6 +8,7 @@ import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -20,12 +21,15 @@ public class UserService {
     @Autowired
     private UserRepository repo;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     public ServiceResponse<List<UserResp>> getAll() {
         try {
             List<User> users = repo.findAll();
             List<UserResp> resp = new ArrayList<>();
             for (User user : users) {
-                resp.add(new UserResp(user.getId().toString(), user.getName()));
+                resp.add(new UserResp(user.getId().toString(), user.getName(), user.getRoles()));
             }
             return new ServiceResponse<>(resp, null);
         } catch (Exception e) {
@@ -40,7 +44,7 @@ public class UserService {
             if (user.isPresent()) {
                 return new ServiceResponse<>(
                         new UserResp(
-                                user.get().getId().toString(), user.get().getName()),
+                                user.get().getId().toString(), user.get().getName(), user.get().getRoles()),
                         null
                 );
             } else {
@@ -81,6 +85,7 @@ public class UserService {
 
     public ServiceResponse<Boolean> createUser(User user) {
         try {
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
             repo.save(user);
             return new ServiceResponse<>(true, null);
         } catch (Exception e) {
